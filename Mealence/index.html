@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>🍽️ Mealence </title>
+  <style>
+    /* ===== Colorful but safe styling (no structure changes) ===== */
+    :root{
+      --bg1:#fff0e6;
+      --bg2:#ffe6f2;
+      --card:#ffffff;
+      --text:#2c3e50;
+      --muted:#7f8c8d;
+      --accent-1:#ff6a00;
+      --accent-2:#ee0979;
+      --btn-1:#36d1dc;
+      --btn-2:#5b86e5;
+      --remove:#c0392b;
+      --chip-vegan:#27ae60;
+      --chip-veg:#9b59b6;
+      --chip-hp:#2980b9;
+      --chip-lowcarb:#f39c12;
+      --chip-sea:#16a085;
+    }
+    body {
+      font-family: "Segoe UI", sans-serif;
+      margin: 0;
+      background: linear-gradient(120deg, var(--bg1), var(--bg2));
+      color: var(--text);
+    }
+    header {
+      background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+      color: white;
+      text-align: center;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+    h1 { margin: 0; font-size: 2rem; color:#fff; }
+    header p { margin:.25rem 0 0; color:#fffbe8 }
+
+    .container {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.5rem;
+      padding: 1rem;
+    }
+    @media (max-width: 900px) {
+      .container { grid-template-columns: 1fr; }
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 0.8rem;
+      border-radius: 10px;
+      border: 2px solid #ddd;
+      font-size: 1rem;
+      background:#fffdf8;
+      color: var(--text);
+    }
+
+    .meal-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .meal-card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s;
+    }
+    .meal-card:hover { transform: translateY(-2px); }
+    .meal-card img {
+      width: 100%;
+      height: 130px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 0.5rem;
+    }
+    .meal-card h3 { margin: 0.3rem 0; font-size: 1.1rem; color: #e74c3c; }
+    .meal-card p { margin: 0.2rem 0; font-size: 0.9rem; color: var(--muted); }
+
+    .tag {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      margin-top: 0.3rem;
+      color: white;
+    }
+    .tag.Vegan { background: var(--chip-vegan); }
+    .tag.Vegetarian { background: var(--chip-veg); }
+    .tag.HighProtein { background: var(--chip-hp); }
+    .tag.LowCarb { background: var(--chip-lowcarb); }
+    .tag.Seafood { background: var(--chip-sea); }
+
+    .meal-card button, .meal-card select {
+      margin-top: 0.3rem;
+      padding: 0.6rem;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(90deg, var(--btn-1), var(--btn-2));
+      color: white;
+      cursor: pointer;
+      transition: filter 0.2s;
+      width: 100%;
+    }
+    .meal-card select{
+      background:#f4f8ff; color:#2c3e50; border:2px solid #e3ecff;
+    }
+    .meal-card button:hover { filter: brightness(0.95); }
+
+    .planner, .favorites, .shopping, .calorie-calculator {
+      background: var(--card);
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      margin-bottom: 1rem;
+    }
+    .planner h2 { color:#e67e22 }
+    .favorites h2 { color:#9b59b6 }
+    .shopping h2 { color:#27ae60 }
+    .calorie-calculator h2 { color:#2980b9 }
+
+    .day {
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      border-radius: 8px;
+      background: #f7f7f7;
+    }
+    .day h4 { margin: 0 0 0.3rem 0; color: var(--accent-1); }
+
+    .meal-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fff3e0;
+      padding: 0.3rem 0.5rem;
+      border-radius: 6px;
+      margin: 0.2rem 0;
+      color: #2c3e50;
+    }
+    .meal-item button {
+      background: transparent;
+      border: none;
+      color: var(--remove);
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    .favorites ul, .shopping ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .favorites li {
+      background: #f8efff;
+      margin: 0.3rem 0;
+      padding: 0.4rem;
+      border-radius: 6px;
+      color: #6c3483;
+    }
+    .shopping li {
+      background: #eafaf1;
+      margin: 0.3rem 0;
+      padding: 0.4rem;
+      border-radius: 6px;
+      color: #1e8449;
+    }
+
+    .fav-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 1.2rem;
+      color: #999;
+      transition: color 0.2s;
+    }
+    .fav-btn.active { color: gold; }
+
+    .calorie-calculator label {
+      display: block;
+      margin: 0.5rem 0 0.2rem;
+      color: var(--text);
+    }
+    .calorie-calculator input {
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background: #fdfdfd;
+      color: #34495e;
+    }
+    .calorie-calculator button {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(90deg, var(--btn-1), var(--btn-2));
+      color: white;
+      cursor: pointer;
+      transition: filter 0.2s;
+    }
+    .calorie-calculator button:hover { filter: brightness(0.95); }
+    #calorie-result { color: #c0392b; font-weight:700; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🍽️ Mealence </h1>
+    <p>Plan your meals, track calories & stay healthy!</p>
+  </header>
+
+  <main class="container">
+    <!-- Left Side -->
+    <section>
+      <div class="search-box">
+        <input id="search" type="text" placeholder="🔍 Search meals by name or diet...">
+      </div>
+      <div id="meal-list" class="meal-list"></div>
+    </section>
+
+    <!-- Right Side -->
+    <aside>
+      <div class="planner">
+        <h2>📅 Weekly Planner</h2>
+        <div id="planner"></div>
+      </div>
+
+      <div class="favorites">
+        <h2>⭐ Favorites</h2>
+        <ul id="favorites-list"></ul>
+      </div>
+
+      <div class="shopping">
+        <h2>🛒 Shopping List</h2>
+        <ul id="shopping-list"></ul>
+      </div>
+
+      <div class="calorie-calculator">
+        <h2>🔥 Calorie Calculator</h2>
+        <form id="calorie-form">
+          <label for="food-name">Food Name:</label>
+          <input type="text" id="food-name" placeholder="e.g., Apple" required />
+          <label for="calories">Calories per Serving:</label>
+          <input type="number" id="calories" placeholder="e.g., 95" required />
+          <label for="servings">Number of Servings:</label>
+          <input type="number" id="servings" placeholder="e.g., 2" required />
+          <button type="submit">Calculate</button>
+        </form>
+        <div id="calorie-result" style="margin-top: 1rem;"></div>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    /* ===== Data (unchanged structure) ===== */
+   const meals = [
+  { name: "Grilled Chicken Salad", diet: "HighProtein", calories: 350, ingredients: ["Chicken", "Lettuce", "Olive Oil"], img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTIFz1jW_AuCq-ri8jLqcaVGuSsLfSquqxYYg&s" },
+  { name: "Veggie Stir Fry", diet: "Vegan", calories: 280, ingredients: ["Broccoli", "Tofu", "Soy Sauce"], img: "https://s.lightorangebean.com/media/20240914144639/Thai-Vegetable-Stir-Fry-with-Lime-and-Ginger_done.png" },
+  { name: "Pasta Primavera", diet: "Vegetarian", calories: 400, ingredients: ["Pasta", "Zucchini", "Tomatoes"], img: "https://images.themodernproper.com/production/posts/PastaPrimavera_9.jpg?w=960&h=960&q=82&fm=jpg&fit=crop&dm=1719193336&s=937ab7a995140869e824b6eac4374aa7" },
+  { name: "Paneer Tikka", diet: "Vegetarian", calories: 450, ingredients: ["Paneer", "Yogurt", "Spices"], img: "https://spicecravings.com/wp-content/uploads/2020/10/Paneer-Tikka-Featured-1.jpg" },
+  { name: "Avocado Toast", diet: "Vegan", calories: 220, ingredients: ["Bread", "Avocado", "Salt"], img: "https://www.dinneratthezoo.com/wp-content/uploads/2018/12/avocado-toast-14.jpg" },
+  { name: "Chicken Biryani", diet: "HighProtein", calories: 600, ingredients: ["Chicken", "Rice", "Spices"], img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSVt4aAT6t8SWbxuE7YgThGOLOOPImFMqCpYg&s" },
+  { name: "Margarita Pizza", diet: "Vegetarian", calories: 500, ingredients: ["Flour", "Cheese", "Tomato Sauce"], img: "https://grandecheese.com/wp-content/uploads/2025/02/Margherita-Pizza-deck-oven.jpg.webp" },
+  { name: "Caesar Salad", diet: "LowCarb", calories: 320, ingredients: ["Lettuce", "Croutons", "Caesar Dressing"], img: "https://www.cuisinart.com/dw/image/v2/ABAF_PRD/on/demandware.static/-/Sites-us-cuisinart-sfra-Library/default/dw92573286/images/recipe-Images/classic-caesar-salad-recipe.jpg?sw=1200&sh=1200&sm=fit" },
+  { name: "Sushi Rolls", diet: "Seafood", calories: 350, ingredients: ["Rice", "Nori", "Fish"], img: "https://images.getrecipekit.com/20240910122309-tuna-20avocado-20roll-20img-201.jpeg?class=16x9" },
+  { name: "Falafel Wrap", diet: "Vegan", calories: 300, ingredients: ["Falafel", "Tortilla", "Hummus"], img: "https://gourmandelle.com/wp-content/uploads/2018/02/falafel-wrap-recipe-falafel-la-lipie-1.jpg" },
+  { name: "Green Detox Smoothie", diet: "Vegan", calories: 150, ingredients: ["Spinach", "Banana", "Apple", "Lemon", "Water"], img: "https://www.eatingbirdfood.com/wp-content/uploads/2021/12/green-detox-smoothie-hero-633x950.jpg" },
+  { name: "Protein Shake", diet: "HighProtein", calories: 220, ingredients: ["Whey Protein", "Banana", "Almond Milk"], img: "https://www.chelseasmessyapron.com/wp-content/uploads/2019/10/CHOCOLATE-PROTEIN-SHAKE-CHELSEASMESSYAPRON-1200-2.jpeg" },
+  { name: "Herbal Green Tea", diet: "LowCalorie", calories: 5, ingredients: ["Green Tea Leaves", "Hot Water", "Lemon"], img: "https://cpimg.tistatic.com/10157190/b/7/Herbal-Green-Tea.jpg" },
+  { name: "Fruit Infused Water", diet: "Vegan", calories: 20, ingredients: ["Water", "Orange", "Cucumber", "Mint"], img: "https://theflexiblechef.com/wp-content/uploads/2016/05/infused-water.jpg" },
+  { name: "Fresh Carrot Juice", diet: "Vegetarian", calories: 90, ingredients: ["Carrots", "Ginger", "Lemon"], img: "https://i0.wp.com/post.healthline.com/wp-content/uploads/2020/10/carrot-juice-1296x728-header.jpg?w=1155&h=1528" }
+];
+    const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+    let planner = JSON.parse(localStorage.getItem("planner")) || { Mon:[], Tue:[], Wed:[], Thu:[], Fri:[], Sat:[], Sun:[] };
+    let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+
+    function saveData() {
+      localStorage.setItem("planner", JSON.stringify(planner));
+      localStorage.setItem("favorites", JSON.stringify(favorites));
+    }
+
+    /* Helper: normalize text for smarter search (handles spaces) */
+    const norm = s => s.toLowerCase().replace(/\s+/g,'');
+
+    function renderMeals(filter="") {
+      const list = document.getElementById("meal-list");
+      list.innerHTML = "";
+      meals
+        .filter(m => norm(m.name).includes(norm(filter)) || norm(m.diet).includes(norm(filter)))
+        .forEach(m => {
+          const card = document.createElement("div");
+          card.className = "meal-card";
+          card.innerHTML = `
+            <img src="${m.img}" alt="${m.name}">
+            <h3>${m.name}</h3>
+            <span class="tag ${m.diet}">${m.diet}</span>
+            <p><b>Calories:</b> ${m.calories} kcal</p>
+            <p><b>Ingredients:</b> ${m.ingredients.join(", ")}</p>
+            <select class="day-select">
+              <option value="">Select Day</option>
+              ${days.map(d => `<option value="${d}">${d}</option>`).join("")}
+            </select>
+            <button class="add-btn">Add to Planner</button>
+            <button class="fav-btn ${favorites.includes(m.name)?'active':''}" title="Toggle favorite">★</button>
+          `;
+
+          // Add to planner
+          card.querySelector(".add-btn").addEventListener("click", () => {
+            const day = card.querySelector(".day-select").value;
+            if(!day) { alert("Please select a day!"); return; }
+            planner[day].push(m);
+            saveData();
+            renderPlanner();
+            renderShopping();
+          });
+
+          // Favorite toggle
+          const favBtn = card.querySelector(".fav-btn");
+          favBtn.addEventListener("click", () => {
+            if(favorites.includes(m.name)) {
+              favorites = favorites.filter(f => f !== m.name);
+            } else {
+              favorites.push(m.name);
+            }
+            saveData();
+            renderMeals(filter);   // refresh star states
+            renderFavorites();
+          });
+
+          list.appendChild(card);
+        });
+    }
+
+    function renderPlanner() {
+      const planDiv = document.getElementById("planner");
+      planDiv.innerHTML = "";
+      days.forEach(d => {
+        const dayDiv = document.createElement("div");
+        dayDiv.className = "day";
+        dayDiv.innerHTML = `<h4>${d}</h4>`;
+        if (planner[d].length === 0) {
+          const empty = document.createElement("p");
+          empty.style.cssText = "color:#a0a0a0;margin:0;";
+          empty.textContent = "No meals planned";
+          dayDiv.appendChild(empty);
+        } else {
+          planner[d].forEach((m,i) => {
+            const item = document.createElement("div");
+            item.className = "meal-item";
+            item.innerHTML = `<span>${m.name}</span> <button title="Remove">&times;</button>`;
+            item.querySelector("button").addEventListener("click", () => {
+              planner[d].splice(i,1);
+              saveData();
+              renderPlanner();
+              renderShopping();
+            });
+            dayDiv.appendChild(item);
+          });
+        }
+        planDiv.appendChild(dayDiv);
+      });
+    }
+
+    function renderFavorites() {
+      const favList = document.getElementById("favorites-list");
+      favList.innerHTML = "";
+      favorites.forEach(f => {
+        const li = document.createElement("li");
+        li.textContent = f;
+        favList.appendChild(li);
+      });
+    }
+
+    function renderShopping() {
+      const shopList = document.getElementById("shopping-list");
+      shopList.innerHTML = "";
+      let allIngredients = [];
+      Object.values(planner).flat().forEach(m => allIngredients.push(...m.ingredients));
+      // Keep unique list (as in your original behavior)
+      [...new Set(allIngredients)].forEach(i => {
+        const li = document.createElement("li");
+        li.textContent = i;
+        shopList.appendChild(li);
+      });
+    }
+
+    // Calorie Calculator (unchanged behavior)
+    document.getElementById("calorie-form").addEventListener("submit", e => {
+      e.preventDefault();
+      const food = document.getElementById("food-name").value.trim();
+      const cal = +document.getElementById("calories").value;
+      const servings = +document.getElementById("servings").value;
+      if(!food || isNaN(cal) || isNaN(servings) || cal<=0 || servings<=0){
+        alert("Please enter valid values.");
+        return;
+      }
+      const total = cal * servings;
+      document.getElementById("calorie-result").textContent = `${food} → ${total} kcal`;
+      e.target.reset();
+    });
+
+    // Search
+    document.getElementById("search").addEventListener("input", e => renderMeals(e.target.value));
+
+    // Initial render
+    renderMeals();
+    renderPlanner();
+    renderFavorites();
+    renderShopping();
+  </script>
+</body>
+</html>
